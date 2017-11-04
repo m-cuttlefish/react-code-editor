@@ -5,7 +5,8 @@ import normalizeCode from '../utils/normalizeCode'
 import normalizeHtml from '../utils/normalizeHtml'
 import htmlToPlain from '../utils/htmlToPlain'
 import selectionRange from '../vendor/selection-range'
-import {getIndent, getDeindentLevel} from '../utils/getIndent'
+import {getIndent, getLine, getLineRange, getDeindentLevel} from '../utils/getIndent'
+import {setCaretPosition, deleteTimes} from '../utils/contentEditableUtils'
 import Style from './Style'
 
 class Editor extends Component {
@@ -14,7 +15,10 @@ class Editor extends Component {
         mountStyle: true,
         language: '',
         tabSize: 4,
-        code: ''
+        code: '',
+        className: '',
+        style: {},
+        ignoreTabKey: false
     };
 
     undoStack = []
@@ -48,10 +52,10 @@ class Editor extends Component {
             return
         }
 
-        if (this.undoOffset > 0) {
-            this.undoStack = this.undoStack.slice(0, -this.undoOffset)
-            this.undoOffset = 0
-        }
+        // if (this.undoOffset > 0) {
+        //     this.undoStack = this.undoStack.slice(0, -this.undoOffset)
+        //     this.undoOffset = 0
+        // }
 
         const timestamp = Date.now()
         const record = {plain, selection}
@@ -70,9 +74,9 @@ class Editor extends Component {
         this.undoTimestamp = timestamp
     }
 
-    updateContent = plain => {
+    updateContent = (plain = this.getPlain(), callback) => {
         const highlighted = prism(plain, this.props.language);
-        this.setState({html: highlighted})
+        this.setState({html: highlighted}, callback)
 
         if (this.props.onChange) {
             this.props.onChange(plain)
@@ -115,12 +119,16 @@ class Editor extends Component {
             onKeyDown(evt);
         }
 
+        if (this.props.ignoreTabKey && evt.keyCode === 9) {
+            return
+        }
+
         let shiftTab = false;
-        if (evt.keyCode === 9 && !evt.shiftKey && !this.props.ignoreTabKey) { // Tab Key
-            document.execCommand('insertHTML', false, ' '.repeat(tabSize))
+        if (evt.keyCode === 9 && !evt.shiftKey) { // Tab Key
+            document.execCommand('insertText', false, ' '.repeat(tabSize))
             evt.preventDefault()
         } else if (
-            evt.keyCode === 8 || (shiftTab = evt.keyCode === 9 && evt.shiftKey && !this.props.ignoreTabKey)
+            evt.keyCode === 8 || (shiftTab = evt.keyCode === 9 && evt.shiftKey)
         ) { // Backspace Key / Shift Tab
             const {start: cursorPos, end: cursorEndPos} = selectionRange(this.ref)
             if (cursorPos !== cursorEndPos) {
@@ -134,16 +142,15 @@ class Editor extends Component {
             }
 
             // Delete chars `deindent` times
-            for (let i = 0; i < deindent; i++) {
-                document.execCommand('delete', false)
-            }
+            deleteTimes(deindent);
 
             evt.preventDefault()
         } else if (evt.keyCode === 13) { // Enter Key
             const {start: cursorPos} = selectionRange(this.ref)
             const indentation = getIndent(this.getPlain(), cursorPos)
-            document.execCommand('insertHTML', false, '\n' + indentation)
+            document.execCommand('insertText', false, '\n' + indentation)
             evt.preventDefault()
+            // this.undoTimestamp = 0
         } else if (
             // Undo / Redo
             evt.keyCode === 90 &&
@@ -157,6 +164,73 @@ class Editor extends Component {
             }
 
             evt.preventDefault()
+        } else if (
+            // Cmd/Ctrl + `/`
+            evt.ctrlKey !== evt.metaKey &&
+            evt.keyCode === 191
+        ) {
+            evt.preventDefault();
+
+            const {start: cursorPos, end: selectionEndPos} = selectionRange(this.ref);
+            const plain = this.getPlain();
+            const range = getLineRange(plain, cursorPos);
+            const line = getLine(plain, cursorPos);
+            // Remove `//` begin of line
+            if (/^(\s*)(\/\/\s?)/.test(line)) {
+                const pos = range[0] + RegExp.$1.length + RegExp.$2.length;
+                selectionRange(this.ref, {start: pos, end: pos});
+                deleteTimes(RegExp.$2.length);
+                selectionRange(this.ref, {start: cursorPos - RegExp.$2.length, end: selectionEndPos - RegExp.$2.length});
+
+                return;
+            }
+
+            // Append `// ` begin of line
+            selectionRange(this.ref, {start: range[0], end: range[0]});
+            document.execCommand('insertText', false, '// ');
+            if (range[1] !== plain.length) {
+                selectionRange(this.ref, {start: (cursorPos - range[0]) + range[1], end: (selectionEndPos - range[0]) + range[1]});
+            } else {
+                // EOF
+                selectionRange(this.ref, {start: cursorPos + 3, end: selectionEndPos + 3});
+            }
+        } else if (
+            // Cmd/Ctrl + `D`
+            evt.ctrlKey !== evt.metaKey &&
+            evt.keyCode === 68
+        ) {
+            evt.preventDefault();
+            const {start: cursorPos, end: selectionEndPos} = selectionRange(this.ref)
+            const plain = this.getPlain()
+            const line = getLine(plain, cursorPos)
+            const range = getLineRange(plain, cursorPos)
+            if (cursorPos === selectionEndPos) {
+                selectionRange(this.ref, {start: range[1], end: range[1]})
+                if (range[1] !== plain.length) {
+                    document.execCommand('insertText', false, line.replace(/\n$/, '\r\n'))
+                } else {
+                    document.execCommand('insertText', false, '\n' + line.replace(/\n$/, '\r\n'))
+                }
+
+                const {start, end} = selectionRange(this.ref)
+                selectionRange(this.ref, {
+                    start: range[1] + (cursorPos - range[0]),
+                    end: range[1] + (selectionEndPos - range[0])
+                });
+            }
+            else {
+                selectionRange(this.ref, {
+                    start: selectionEndPos,
+                    end: selectionEndPos
+                });
+                const selectionText
+                    = line.substring(cursorPos - range[0], selectionEndPos - range[0])
+                document.execCommand('insertText', false, selectionText);
+                selectionRange(this.ref, {
+                    start: selectionEndPos,
+                    end: selectionEndPos + selectionText.length
+                });
+            }
         }
     }
 
@@ -164,14 +238,16 @@ class Editor extends Component {
         if (this.props.onKeyUp) {
             this.props.onKeyUp(evt)
         }
-        if (
-            evt.keyCode === 91 || // left cmd
-            evt.keyCode === 93 || // right cmd
-            evt.ctrlKey ||
-            evt.metaKey
-        ) {
-            return;
-        }
+        // if (
+        //     (
+        //         evt.keyCode === 91 || // left cmd
+        //         evt.keyCode === 93 || // right cmd
+        //         evt.ctrlKey ||
+        //         evt.metaKey
+        //     ) && (evt.keyCode !== 191 || evt.keyCode !== 68)
+        // ) {
+        //     return;
+        // }
 
         // Enter key
         if (evt.keyCode === 13) {
@@ -255,8 +331,7 @@ class Editor extends Component {
         } = this.props
         const {html} = this.state
         return (
-            <pre
-            >
+            <pre>
                 {mountStyle && <Style/>}
                 <code
                     spellCheck="false"
@@ -269,7 +344,7 @@ class Editor extends Component {
                     onCompositionStart={contentEditable ? this.onCompositionStart : undefined}
                     onClick={contentEditable ? this.onClick : undefined}
                     contentEditable={contentEditable}
-                    className={cn('high', className)}
+                    className={cn('code-editor', 'high', className)}
                     dangerouslySetInnerHTML={{__html: html}}
                 />
             </pre>

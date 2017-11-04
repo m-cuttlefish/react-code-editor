@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import CodeEditor from '..';
+import CodeEditor from '../src';
 
-import 'highlight.js/styles/github.css'
+import 'highlight.js/styles/tomorrow-night.css'
 
 const code = `
 import React from 'react';
@@ -17,11 +17,12 @@ export default () => <h1>abc</h1>;
 
 ReactDOM.render(
     <CodeEditor
-        mountStyle={false}
+        mountStyle={true}
         language="jsx"
         className="language-jsx"
         code={code}
-        onChange={evt => {
+        ignoreTabKey
+        onChange={data => {
 
         }}
     />,
