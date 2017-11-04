@@ -156,14 +156,6 @@ class Editor extends Component {
         }
     }
 
-    onInput = evt => {
-        if (this.props.onInput) {
-            this.props.onInput(evt)
-        }
-        // const plain = this.getPlain();
-
-    }
-
     onKeyUp = evt => {
         if (this.props.onKeyUp) {
             this.props.onKeyUp(evt)
@@ -269,7 +261,6 @@ class Editor extends Component {
                     onKeyUp={contentEditable ? this.onKeyUp : undefined}
                     onCompositionEnd={contentEditable ? this.onCompositionEnd : undefined}
                     onCompositionStart={contentEditable ? this.onCompositionStart : undefined}
-                    onInput={contentEditable ? this.onInput : undefined}
                     onClick={contentEditable ? this.onClick : undefined}
                     spellCheck="false"
                     contentEditable={contentEditable}
