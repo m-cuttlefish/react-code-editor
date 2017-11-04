@@ -12,12 +12,15 @@ class Editor extends Component {
     static defaultProps = {
         contentEditable: true,
         mountStyle: true,
-        language: ''
+        language: '',
+        tabSize: 4,
+        code: ''
     };
 
     undoStack = []
     undoOffset = 0
     undoTimestamp = 0
+    compositing = false
 
     state = {
         html: ''
@@ -103,12 +106,17 @@ class Editor extends Component {
     }
 
     onKeyDown = evt => {
-        if (this.props.onKeyDown) {
-            this.props.onKeyDown(evt)
+        const {
+            onKeyDown,
+            tabSize
+        } = this.props;
+
+        if (onKeyDown) {
+            onKeyDown(evt);
         }
 
         if (evt.keyCode === 9 && !this.props.ignoreTabKey) { // Tab Key
-            document.execCommand('insertHTML', false, '  ')
+            document.execCommand('insertHTML', false, ' '.repeat(tabSize))
             evt.preventDefault()
         } else if (evt.keyCode === 8) { // Backspace Key
             const {start: cursorPos, end: cursorEndPos} = selectionRange(this.ref)
@@ -116,7 +124,7 @@ class Editor extends Component {
                 return // Bail on selections
             }
 
-            const deindent = getDeindentLevel(this.getPlain(), cursorPos)
+            const deindent = getDeindentLevel(this.getPlain(), cursorPos, tabSize);
             if (deindent <= 0) {
                 return // Bail when deindent level defaults to 0
             }
@@ -134,9 +142,9 @@ class Editor extends Component {
             evt.preventDefault()
         } else if (
             // Undo / Redo
-        evt.keyCode === 90 &&
-        evt.metaKey !== evt.ctrlKey &&
-        !evt.altKey
+            evt.keyCode === 90 &&
+            evt.metaKey !== evt.ctrlKey &&
+            !evt.altKey
         ) {
             if (evt.shiftKey) {
                 this.redo()
@@ -146,6 +154,14 @@ class Editor extends Component {
 
             evt.preventDefault()
         }
+    }
+
+    onInput = evt => {
+        if (this.props.onInput) {
+            this.props.onInput(evt)
+        }
+        // const plain = this.getPlain();
+
     }
 
     onKeyUp = evt => {
@@ -158,7 +174,7 @@ class Editor extends Component {
             evt.ctrlKey ||
             evt.metaKey
         ) {
-            return
+            return;
         }
 
         // Enter key
@@ -174,13 +190,27 @@ class Editor extends Component {
             evt.keyCode !== 39 && // right
             evt.keyCode !== 40 // down
         ) {
-            const plain = this.getPlain()
+            const plain = this.getPlain();
 
-            this.recordChange(plain, this.selection)
-            this.updateContent(plain)
+            this.recordChange(plain, this.selection);
+            !this.compositing && this.updateContent(plain);
         } else {
             this.undoTimestamp = 0
         }
+    }
+
+    onCompositionStart = evt => {
+        if (this.props.onCompositionStart) {
+            this.props.onCompositionStart(evt)
+        }
+        this.compositing = true;
+    }
+
+    onCompositionEnd = evt => {
+        if (this.props.onCompositionEnd) {
+            this.props.onCompositionEnd(evt)
+        }
+        this.compositing = false;
     }
 
     onClick = evt => {
@@ -220,6 +250,7 @@ class Editor extends Component {
             contentEditable,
             className,
             mountStyle,
+            tabSize,
             style,
             code, // ignored & unused
             ignoreTabKey, // ignored & unused
@@ -233,14 +264,17 @@ class Editor extends Component {
                 {mountStyle && <Style/>}
                 <code
                     ref={this.onRef}
-                    {...rest}
                     style={style}
                     onKeyDown={contentEditable ? this.onKeyDown : undefined}
                     onKeyUp={contentEditable ? this.onKeyUp : undefined}
+                    onCompositionEnd={contentEditable ? this.onCompositionEnd : undefined}
+                    onCompositionStart={contentEditable ? this.onCompositionStart : undefined}
+                    onInput={contentEditable ? this.onInput : undefined}
                     onClick={contentEditable ? this.onClick : undefined}
                     spellCheck="false"
                     contentEditable={contentEditable}
                     className={cn('high', className)}
+                    {...rest}
                     dangerouslySetInnerHTML={{__html: html}}
                 />
             </pre>

@@ -19,7 +19,7 @@ export const getIndent = (plain, cursorPos) => {
 
 const deindentSpacesRe = /^(\t|  )*  $/
 
-export const getDeindentLevel = (plain, cursorPos) => {
+export const getDeindentLevel = (plain, cursorPos, tabSize = 2) => {
   const line = getLine(plain, cursorPos)
   if (!deindentSpacesRe.test(line)) {
     return 0 // Doesn't match regex, so normal behaviour can apply
@@ -27,5 +27,5 @@ export const getDeindentLevel = (plain, cursorPos) => {
 
   // The line contains only whitespace indentation
   // thus two characters must be deleted
-  return 2
+  return tabSize;
 }
