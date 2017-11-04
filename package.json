@@ -39,5 +39,13 @@
   "directories": {
     "example": "example",
     "lib": "lib"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m-cuttlefish/react-code-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/m-cuttlefish/react-code-editor/issues"
+  },
+  "homepage": "https://github.com/m-cuttlefish/react-code-editor#readme"
 }
