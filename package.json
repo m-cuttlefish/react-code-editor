@@ -10,6 +10,10 @@
     "dev": "babel src --presets=es2015,react,stage-0 --out-dir lib -Dw",
     "prepublish": "npm run build"
   },
+  "files": [
+    "example",
+    "lib"
+  ],
   "keywords": [],
   "author": "",
   "license": "MIT",
@@ -35,10 +39,6 @@
     "dom-iterator": "^0.3.0",
     "prop-types": "^15.5.8",
     "unescape": "^0.2.0"
-  },
-  "directories": {
-    "example": "example",
-    "lib": "lib"
   },
   "repository": {
     "type": "git",
