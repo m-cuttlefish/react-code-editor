@@ -115,10 +115,13 @@ class Editor extends Component {
             onKeyDown(evt);
         }
 
-        if (evt.keyCode === 9 && !this.props.ignoreTabKey) { // Tab Key
+        let shiftTab = false;
+        if (evt.keyCode === 9 && !evt.shiftKey && !this.props.ignoreTabKey) { // Tab Key
             document.execCommand('insertHTML', false, ' '.repeat(tabSize))
             evt.preventDefault()
-        } else if (evt.keyCode === 8) { // Backspace Key
+        } else if (
+            evt.keyCode === 8 || (shiftTab = evt.keyCode === 9 && evt.shiftKey && !this.props.ignoreTabKey)
+        ) { // Backspace Key / Shift Tab
             const {start: cursorPos, end: cursorEndPos} = selectionRange(this.ref)
             if (cursorPos !== cursorEndPos) {
                 return // Bail on selections
@@ -126,6 +129,7 @@ class Editor extends Component {
 
             const deindent = getDeindentLevel(this.getPlain(), cursorPos, tabSize);
             if (deindent <= 0) {
+                shiftTab && evt.preventDefault();
                 return // Bail when deindent level defaults to 0
             }
 
