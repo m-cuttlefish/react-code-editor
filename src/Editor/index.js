@@ -255,6 +255,8 @@ class Editor extends Component {
             >
                 {mountStyle && <Style/>}
                 <code
+                    spellCheck="false"
+                    {...rest}
                     ref={this.onRef}
                     style={style}
                     onKeyDown={contentEditable ? this.onKeyDown : undefined}
@@ -262,10 +264,8 @@ class Editor extends Component {
                     onCompositionEnd={contentEditable ? this.onCompositionEnd : undefined}
                     onCompositionStart={contentEditable ? this.onCompositionStart : undefined}
                     onClick={contentEditable ? this.onClick : undefined}
-                    spellCheck="false"
                     contentEditable={contentEditable}
                     className={cn('high', className)}
-                    {...rest}
                     dangerouslySetInnerHTML={{__html: html}}
                 />
             </pre>
