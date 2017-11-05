@@ -4,6 +4,7 @@ import prism from '../utils/prism'
 import normalizeCode from '../utils/normalizeCode'
 import normalizeHtml from '../utils/normalizeHtml'
 import htmlToPlain from '../utils/htmlToPlain'
+import escape from '../utils/escape-html'
 import selectionRange from '../vendor/selection-range'
 import {getIndent, getLine, getLineRange, getDeindentLevel} from '../utils/getIndent'
 import {setCaretPosition, deleteTimes} from '../utils/contentEditableUtils'
@@ -148,7 +149,7 @@ class Editor extends Component {
         } else if (evt.keyCode === 13) { // Enter Key
             const {start: cursorPos} = selectionRange(this.ref)
             const indentation = getIndent(this.getPlain(), cursorPos)
-            document.execCommand('insertText', false, '\n' + indentation)
+            document.execCommand('insertHTML', false, '\n' + indentation)
             evt.preventDefault()
             // this.undoTimestamp = 0
         } else if (
