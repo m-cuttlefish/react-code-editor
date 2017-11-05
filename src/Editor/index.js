@@ -344,7 +344,7 @@ class Editor extends Component {
                     onCompositionStart={contentEditable ? this.onCompositionStart : undefined}
                     onClick={contentEditable ? this.onClick : undefined}
                     contentEditable={contentEditable}
-                    className={cn('code-editor', 'high', className)}
+                    className={cn('code-editor', 'hljs', className)}
                     dangerouslySetInnerHTML={{__html: html}}
                 />
             </pre>
