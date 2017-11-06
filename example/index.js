@@ -16,17 +16,31 @@ export default () => <h1>abc</h1>;
 `
 
 ReactDOM.render(
-    <CodeEditor
-        workerURL={"/example/hljs.worker.js.file"}
-        // workerURL={null}
-        mountStyle={true}
-        language="jsx"
-        className="language-jsx"
-        code={code}
-        ignoreTabKey
-        onChange={data => {
+    <div>
+        <CodeEditor
+            workerUrl={"/example/hljs.worker.js.file"}
+            // workerURL={null}
+            mountStyle={true}
+            language="jsx"
+            className="language-jsx"
+            code={code + '\n // sss'}
+            ignoreTabKey
+            onChange={data => {
 
-        }}
-    />,
+            }}
+        />
+        <CodeEditor
+            workerUrl={"/example/hljs.worker.js.file"}
+            // workerURL={null}
+            mountStyle={true}
+            language="jsx"
+            className="language-jsx"
+            code={code}
+            ignoreTabKey
+            onChange={data => {
+
+            }}
+        />
+    </div>,
     document.getElementById('root')
 );

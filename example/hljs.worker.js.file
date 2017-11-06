@@ -1,4 +1,4 @@
-importScripts(['./hljs.js']);
+importScripts(['./hljs.js.file']);
 
 var list = hljs.listLanguages();
 onmessage = function (evt) {

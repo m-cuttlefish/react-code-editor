@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import cn from '../utils/cn'
-import prism from '../utils/prism'
+import prism, {killWorker} from '../utils/prism'
 import normalizeCode from '../utils/normalizeCode'
 import normalizeHtml from '../utils/normalizeHtml'
 import htmlToPlain from '../utils/htmlToPlain'
@@ -22,6 +22,12 @@ class Editor extends Component {
         workerUrl: null,
         ignoreTabKey: false
     };
+
+    id = new Date().getTime()
+
+    componentWillUnmount() {
+        killWorker(this.id)
+    }
 
     undoStack = []
     undoOffset = 0
@@ -77,7 +83,7 @@ class Editor extends Component {
     }
 
     updateContent = async (plain = this.getPlain(), callback) => {
-        const highlighted = await prism({code: plain, language: this.props.language, workerUrl: this.props.workerUrl});
+        const highlighted = await prism({id: this.id, code: plain, language: this.props.language, workerUrl: this.props.workerUrl});
         this.setState({html: highlighted}, callback)
 
         if (this.props.onChange) {
@@ -296,7 +302,7 @@ class Editor extends Component {
     }
 
     async componentDidMount() {
-        const html = await prism({code: normalizeCode(this.props.code), language: this.props.language, workerUrl: this.props.workerUrl})
+        const html = await prism({id: this.id, code: normalizeCode(this.props.code), language: this.props.language, workerUrl: this.props.workerUrl})
         this.setState({html})
         this.recordChange(this.getPlain())
         this.undoTimestamp = 0 // Reset timestamp
@@ -304,7 +310,7 @@ class Editor extends Component {
 
     async componentWillReceiveProps({code, language, workerUrl}) {
         if (code !== this.props.code || language !== this.props.language || workerUrl !== this.props.workerUrl) {
-            const html = await prism({code: normalizeCode(code), language, workerUrl: this.props.workerUrl})
+            const html = await prism({id: this.id, code: normalizeCode(code), language, workerUrl: this.props.workerUrl})
             this.setState({html})
         }
     }
