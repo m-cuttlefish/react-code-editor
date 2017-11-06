@@ -11,6 +11,8 @@
 
 ```js
 static defaultProps = {
+    // Web Worker for fast
+    workerURL: null,
     contentEditable: true,
     // whether inject preset style?
     mountStyle: true,

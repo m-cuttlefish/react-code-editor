@@ -17,6 +17,8 @@ export default () => <h1>abc</h1>;
 
 ReactDOM.render(
     <CodeEditor
+        workerURL={"/example/hljs.worker.js.file"}
+        // workerURL={null}
         mountStyle={true}
         language="jsx"
         className="language-jsx"

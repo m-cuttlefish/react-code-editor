@@ -19,6 +19,7 @@ class Editor extends Component {
         code: '',
         className: '',
         style: {},
+        workerURL: null,
         ignoreTabKey: false
     };
 
@@ -75,8 +76,8 @@ class Editor extends Component {
         this.undoTimestamp = timestamp
     }
 
-    updateContent = (plain = this.getPlain(), callback) => {
-        const highlighted = prism(plain, this.props.language);
+    updateContent = async (plain = this.getPlain(), callback) => {
+        const highlighted = await prism({code: plain, language: this.props.language, workerUrl: this.props.workerURL});
         this.setState({html: highlighted}, callback)
 
         if (this.props.onChange) {
@@ -294,19 +295,16 @@ class Editor extends Component {
         this.selection = selectionRange(this.ref)
     }
 
-    componentWillMount() {
-        const html = prism(normalizeCode(this.props.code), this.props.language)
+    async componentDidMount() {
+        const html = await prism({code: normalizeCode(this.props.code), language: this.props.language, workerUrl: this.props.workerURL})
         this.setState({html})
-    }
-
-    componentDidMount() {
         this.recordChange(this.getPlain())
         this.undoTimestamp = 0 // Reset timestamp
     }
 
-    componentWillReceiveProps({code, language}) {
-        if (code !== this.props.code || language !== this.props.language) {
-            const html = prism(normalizeCode(code), language)
+    async componentWillReceiveProps({code, language, workerUrl}) {
+        if (code !== this.props.code || language !== this.props.language || workerUrl !== this.props.workerURL) {
+            const html = await prism({code: normalizeCode(code), language, workerUrl: this.props.workerURL})
             this.setState({html})
         }
     }
@@ -325,6 +323,7 @@ class Editor extends Component {
             mountStyle,
             tabSize,
             style,
+            workerURL,
             code, // ignored & unused
             ignoreTabKey, // ignored & unused
             language, // ignored & unused
