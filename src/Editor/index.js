@@ -23,7 +23,7 @@ class Editor extends Component {
         ignoreTabKey: false
     };
 
-    id = new Date().getTime()
+    id = Math.random() + '-' + new Date().getTime()
 
     componentWillUnmount() {
         killWorker(this.id)
