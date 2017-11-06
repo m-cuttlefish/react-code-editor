@@ -19,7 +19,7 @@ class Editor extends Component {
         code: '',
         className: '',
         style: {},
-        workerURL: null,
+        workerUrl: null,
         ignoreTabKey: false
     };
 
@@ -77,7 +77,7 @@ class Editor extends Component {
     }
 
     updateContent = async (plain = this.getPlain(), callback) => {
-        const highlighted = await prism({code: plain, language: this.props.language, workerUrl: this.props.workerURL});
+        const highlighted = await prism({code: plain, language: this.props.language, workerUrl: this.props.workerUrl});
         this.setState({html: highlighted}, callback)
 
         if (this.props.onChange) {
@@ -296,15 +296,15 @@ class Editor extends Component {
     }
 
     async componentDidMount() {
-        const html = await prism({code: normalizeCode(this.props.code), language: this.props.language, workerUrl: this.props.workerURL})
+        const html = await prism({code: normalizeCode(this.props.code), language: this.props.language, workerUrl: this.props.workerUrl})
         this.setState({html})
         this.recordChange(this.getPlain())
         this.undoTimestamp = 0 // Reset timestamp
     }
 
     async componentWillReceiveProps({code, language, workerUrl}) {
-        if (code !== this.props.code || language !== this.props.language || workerUrl !== this.props.workerURL) {
-            const html = await prism({code: normalizeCode(code), language, workerUrl: this.props.workerURL})
+        if (code !== this.props.code || language !== this.props.language || workerUrl !== this.props.workerUrl) {
+            const html = await prism({code: normalizeCode(code), language, workerUrl: this.props.workerUrl})
             this.setState({html})
         }
     }
@@ -323,7 +323,7 @@ class Editor extends Component {
             mountStyle,
             tabSize,
             style,
-            workerURL,
+            workerUrl,
             code, // ignored & unused
             ignoreTabKey, // ignored & unused
             language, // ignored & unused
