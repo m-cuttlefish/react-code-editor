@@ -16,7 +16,7 @@ const prism = async ({code, language, workerUrl, id}) => {
     if (worker) {
         return new Promise(function (resolve) {
             worker.postMessage({type: 'highlight', id, arguments: [code, language]})
-            worker.addEventListener('message', ({data}) => resolve(data))
+            worker.onmessage = ({data}) => resolve(data)
         })
     }
 
@@ -28,7 +28,7 @@ export function killWorker(id) {
     if (!worker) return
 
     worker.terminate()
-    worker = null
+    delete workerPool[id]
 }
 
 

@@ -310,7 +310,7 @@ class Editor extends Component {
 
     async componentWillReceiveProps({code, language, workerUrl}) {
         if (code !== this.props.code || language !== this.props.language || workerUrl !== this.props.workerUrl) {
-            const html = await prism({id: this.id, code: normalizeCode(code), language, workerUrl: this.props.workerUrl})
+            const html = await prism({id: this.id, code: normalizeCode(code), language, workerUrl})
             this.setState({html})
         }
     }
