@@ -5,6 +5,7 @@ module.exports = [
         include: [
             // root
         ],
+        exclude: /node_modules/,
         query: {
             cacheDirectory: true,
             presets: ['es2015', 'react', 'stage-0'],

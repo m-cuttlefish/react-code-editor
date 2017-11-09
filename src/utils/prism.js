@@ -1,34 +1,34 @@
 import { highlight, highlightAuto } from 'highlight.js';
 
-let workerPool = {};
+let worker = null;
 
 const prism = async ({code, language, workerUrl, id}) => {
-    let worker = workerPool[id]
 
-    if (typeof Worker === 'function' && !worker && typeof workerUrl === 'string') {
-        worker = new Worker(workerUrl);
-        workerPool[id] = worker;
-    }
-    if (typeof workerUrl !== 'string' && worker) {
-        killWorker(id)
-    }
+    return new Promise(function (resolve) {
+        if (typeof Worker === 'function' && !worker && typeof workerUrl === 'string') {
+            worker = new Worker(workerUrl);
+            worker.onmessage = ({data: {result, id: workerId}}) => (id === workerId) && resolve(result)
+        }
+        if (typeof workerUrl !== 'string' && worker) {
+            killWorker()
+        }
 
-    if (worker) {
-        return new Promise(function (resolve) {
+        if (worker) {
             worker.postMessage({type: 'highlight', id, arguments: [code, language]})
-            worker.onmessage = ({data}) => resolve(data)
-        })
-    }
+            return
+        }
+        resolve(
+            (language ? highlight(language, code, true) : highlightAuto(code)).value
+        )
+    });
 
-    return (language ? highlight(language, code, true) : highlightAuto(code)).value
 }
 
-export function killWorker(id) {
-    let worker = workerPool[id]
+export function killWorker() {
     if (!worker) return
 
     worker.terminate()
-    delete workerPool[id]
+    worker = null
 }
 
 

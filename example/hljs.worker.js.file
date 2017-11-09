@@ -5,6 +5,7 @@ onmessage = function (evt) {
     var data = evt.data
     data = data || {}
     var type = data.type
+    var id = data.id
     var arguments = data.arguments || []
     var code = arguments[0]
     var lang = arguments[1] || ''
@@ -14,6 +15,6 @@ onmessage = function (evt) {
         lang = ''
     }
     var result = (lang ? hljs.highlight(lang, code, true) : hljs.highlightAuto(code)).value
-    postMessage(result)
+    postMessage({result: result, id: id})
 }
 

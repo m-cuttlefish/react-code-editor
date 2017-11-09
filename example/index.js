@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
-import CodeEditor from '../src';
+import CodeEditor from '../lib';
 
 import 'highlight.js/styles/tomorrow-night.css'
 
@@ -18,8 +18,8 @@ export default () => <h1>abc</h1>;
 ReactDOM.render(
     <div>
         <CodeEditor
-            // workerUrl={"/example/hljs.worker.js.file"}
-            workerUrl={null}
+            workerUrl={"/example/hljs.worker.js.file"}
+            // workerUrl={null}
             mountStyle={true}
             language="jsx"
             className="language-jsx"
@@ -30,7 +30,7 @@ ReactDOM.render(
             }}
         />
         <CodeEditor
-            workerUrl={"/example/hljs.worker.js.file"}
+            // workerUrl={"/example/hljs.worker.js.file"}
             // workerUrl={null}
             mountStyle={true}
             language="jsx"
