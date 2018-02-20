@@ -364,9 +364,9 @@ class Editor extends Component {
         } = this.props
         const {html, prefixHtml} = this.state
         return (
-            <pre className={cn('code-editor', 'hljs', className)}>
+            <pre>
                 {mountStyle && <Style/>}
-                <code>
+                <code className={cn('code-editor', 'hljs', className)}>
                     <div
                         className={cn('prefix-code', prefixCodeClassName)}
                         dangerouslySetInnerHTML={{__html: prefixHtml}}
