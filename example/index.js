@@ -10,7 +10,22 @@ import CodeEditor from '../src';
 
 import 'highlight.js/styles/tomorrow-night.css'
 
-const code = `
+const code = `export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
+export default () => <h1>abc</h1>;
 export default () => <h1>abc</h1>;
 `
 

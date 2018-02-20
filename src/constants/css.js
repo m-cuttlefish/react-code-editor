@@ -24,4 +24,7 @@ export default `
   -o-tab-size: 2;
   tab-size: 2;
 }
+.code-editor .prefix-code, .code-editor .prefix-code * {
+  cursor: not-allowed;
+}
 `

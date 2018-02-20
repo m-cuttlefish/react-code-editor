@@ -22,7 +22,8 @@ class Editor extends Component {
         tabSize: 4,
         code: '',
         prefixCode: '',
-        prefixCodeClassName: 'prefix-code',
+        prefixCodeClassName: '',
+        editContentClassName: '',
         className: '',
         style: {},
         workerUrl: null,
@@ -365,25 +366,26 @@ class Editor extends Component {
         return (
             <pre className={cn('code-editor', 'hljs', className)}>
                 {mountStyle && <Style/>}
-                <span
-                    contentEditable={false}
-                    className={cn(prefixCodeClassName)}
-                    dangerouslySetInnerHTML={{__html: prefixHtml}}
-                />
-                <code
-                    spellCheck="false"
-                    {...rest}
-                    ref={this.onRef}
-                    style={style}
-                    onKeyDown={contentEditable ? this.onKeyDown : undefined}
-                    onKeyUp={contentEditable ? this.onKeyUp : undefined}
-                    onCompositionEnd={contentEditable ? this.onCompositionEnd : undefined}
-                    onCompositionStart={contentEditable ? this.onCompositionStart : undefined}
-                    onClick={contentEditable ? this.onClick : undefined}
-                    contentEditable={contentEditable}
-                    className={cn(editContentClassName)}
-                    dangerouslySetInnerHTML={{__html: html}}
-                />
+                <code>
+                    <div
+                        className={cn('prefix-code', prefixCodeClassName)}
+                        dangerouslySetInnerHTML={{__html: prefixHtml}}
+                    />
+                    <div
+                        spellCheck="false"
+                        {...rest}
+                        ref={this.onRef}
+                        style={style}
+                        onKeyDown={contentEditable ? this.onKeyDown : undefined}
+                        onKeyUp={contentEditable ? this.onKeyUp : undefined}
+                        onCompositionEnd={contentEditable ? this.onCompositionEnd : undefined}
+                        onCompositionStart={contentEditable ? this.onCompositionStart : undefined}
+                        onClick={contentEditable ? this.onClick : undefined}
+                        contentEditable={contentEditable}
+                        className={cn('edit-content', editContentClassName)}
+                        dangerouslySetInnerHTML={{__html: html}}
+                    />
+                </code>
             </pre>
         )
     }
