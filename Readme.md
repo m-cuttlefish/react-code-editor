@@ -11,6 +11,8 @@
 
 ```js
 static defaultProps = {
+    prefixCode: '',
+    prefixCodeClassName: 'prefix-code',
     // Web Worker for fast
     workerUrl: null,
     contentEditable: true,
@@ -31,4 +33,4 @@ static defaultProps = {
 
 ## Todo
 
-- [ ] worker.js ?
+- [x] worker.js ?

@@ -10,6 +10,10 @@ import {getIndent, getLine, getLineRange, getDeindentLevel} from '../utils/getIn
 import {setCaretPosition, deleteTimes} from '../utils/contentEditableUtils'
 import Style from './Style'
 
+function disableHtml(html, { className = '' }) {
+    return html
+}
+
 class Editor extends Component {
     static defaultProps = {
         contentEditable: true,
@@ -17,6 +21,8 @@ class Editor extends Component {
         language: '',
         tabSize: 4,
         code: '',
+        prefixCode: '',
+        prefixCodeClassName: 'prefix-code',
         className: '',
         style: {},
         workerUrl: null,
@@ -35,7 +41,8 @@ class Editor extends Component {
     compositing = false
 
     state = {
-        html: ''
+        html: '',
+        prefixHtml: ''
     }
 
     onRef = node => {
@@ -306,12 +313,28 @@ class Editor extends Component {
         this.setState({html})
         this.recordChange(this.getPlain())
         this.undoTimestamp = 0 // Reset timestamp
+
+        if (this.props.prefixCode) {
+            const prefixHtml = await prism({code: normalizeCode(this.props.prefixCode), language: this.props.language})
+            this.setState({prefixHtml: prefixHtml})
+        }
     }
 
-    async componentWillReceiveProps({code, language, workerUrl}) {
+    async componentWillReceiveProps({code, language, workerUrl, prefixCode, prefixCodeClassName}) {
         if (code !== this.props.code || language !== this.props.language || workerUrl !== this.props.workerUrl) {
             const html = await prism({id: this.id, code: normalizeCode(code), language, workerUrl})
             this.setState({html})
+        }
+        if (
+            prefixCode !== this.props.prefixCode
+            || language !== this.props.language
+            || prefixCodeClassName !== this.props.prefixCodeClassName
+        ) {
+            let prefixHtml = ''
+            if (prefixCode) {
+                prefixHtml = await prism({code: normalizeCode(prefixCode), language})
+            }
+            this.setState({prefixHtml: prefixHtml})
         }
     }
 
@@ -330,15 +353,23 @@ class Editor extends Component {
             tabSize,
             style,
             workerUrl,
+            prefixCode,
+            prefixCodeClassName,
+            editContentClassName,
             code, // ignored & unused
             ignoreTabKey, // ignored & unused
             language, // ignored & unused
             ...rest
         } = this.props
-        const {html} = this.state
+        const {html, prefixHtml} = this.state
         return (
-            <pre>
+            <pre className={cn('code-editor', 'hljs', className)}>
                 {mountStyle && <Style/>}
+                <span
+                    contentEditable={false}
+                    className={cn(prefixCodeClassName)}
+                    dangerouslySetInnerHTML={{__html: prefixHtml}}
+                />
                 <code
                     spellCheck="false"
                     {...rest}
@@ -350,7 +381,7 @@ class Editor extends Component {
                     onCompositionStart={contentEditable ? this.onCompositionStart : undefined}
                     onClick={contentEditable ? this.onClick : undefined}
                     contentEditable={contentEditable}
-                    className={cn('code-editor', 'hljs', className)}
+                    className={cn(editContentClassName)}
                     dangerouslySetInnerHTML={{__html: html}}
                 />
             </pre>
